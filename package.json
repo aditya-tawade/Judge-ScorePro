@@ -1,7 +1,22 @@
 {
   "name": "temp-app",
   "version": "0.1.0",
-  "private": true,
+  "description": "Real-time competition scoring management system built with Next.js, MongoDB, and Pusher.",
+  "keywords": [
+    "judge-scoring",
+    "real-time-leaderboard",
+    "competition-management",
+    "nextjs",
+    "mongodb",
+    "pusher",
+    "talent-show-app"
+  ],
+  "author": "Judge Score Pro",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/judge-score-pro.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -12,8 +12,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Judge Score Pro",
-  description: "Real-time competition scoring management",
+  title: "Judge Score Pro | Real-time Competition Scoring",
+  description: "A professional, real-time competition scoring management system. perfect for dance, music, and talent show judging.",
+  keywords: ["judge scoring", "live leaderboard", "real-time results", "competition management", "talent show scoring", "professional judging app"],
+  authors: [{ name: "Judge Score Pro Team" }],
+  openGraph: {
+    title: "Judge Score Pro",
+    description: "Manage your competition scoring with real-time accuracy and professional PDF reporting.",
+    type: "website",
+  }
 };
 
 
