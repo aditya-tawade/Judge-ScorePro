@@ -62,23 +62,33 @@ npm install
 ```
 
 ### 3. Environment Configuration
-Create a `.env.local` file in the root directory and add the following variables:
+Create a `.env.local` file in the root directory and add the variables listed below.
+
+#### 🛰️ Pusher Configuration Guide
+To get your Pusher credentials for real-time features:
+1.  **Sign Up**: Create a free account at [Pusher.com](https://pusher.com/).
+2.  **Create App**: Go to "Channels" -> "Create App".
+3.  **Name & Cluster**: Give it a name (e.g., "ScorePro") and select the cluster closest to you.
+4.  **App Keys**: Once created, click on **"App Keys"** in the sidebar.
+5.  **Copy to ENV**: Copy the values into your `.env.local` as shown below:
 
 ```env
 # MongoDB
 MONGODB_URI=your_mongodb_connection_string
 
-# Pusher (Real-time)
-PUSHER_APP_ID=your_app_id
-PUSHER_KEY=your_key
-PUSHER_SECRET=your_secret
-PUSHER_CLUSTER=your_cluster
-NEXT_PUBLIC_PUSHER_KEY=your_key
-NEXT_PUBLIC_PUSHER_CLUSTER=your_cluster
+# Pusher (Copy from your Pusher App Keys)
+PUSHER_APP_ID="your_app_id"
+PUSHER_KEY="your_key"
+PUSHER_SECRET="your_secret"
+PUSHER_CLUSTER="your_cluster"
+
+# Public Pusher (Required for Client-side)
+NEXT_PUBLIC_PUSHER_KEY="your_key"
+NEXT_PUBLIC_PUSHER_CLUSTER="your_cluster"
 
 # Admin Access
-ADMIN_USERNAME=admin_user
-ADMIN_PASSWORD=secure_password
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin
 ```
 
 ### 4. Run Development Server

@@ -1,5 +1,5 @@
 {
-  "name": "temp-app",
+  "name": "open-judge-score",
   "version": "0.1.0",
   "description": "Real-time competition scoring management system built with Next.js, MongoDB, and Pusher.",
   "keywords": [
@@ -15,7 +15,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/judge-score-pro.git"
+    "url": "https://github.com/aditya-tawade/Open-Judge-Score.git"
   },
   "scripts": {
     "dev": "next dev",
