@@ -19,9 +19,20 @@ export default function JudgeScoring() {
     useEffect(() => {
         const jId = localStorage.getItem('judgeId');
         const jName = localStorage.getItem('judgeName');
-        if (!jId) router.push('/judge');
+        if (!jId) {
+            router.push('/judge');
+            return;
+        }
         setJudgeId(jId);
         setJudgeName(jName);
+
+        // Verify judge still exists in DB
+        fetch('/api/judges').then(res => res.json()).then(data => {
+            if (!data.find(j => j._id === jId)) {
+                localStorage.clear();
+                router.push('/judge');
+            }
+        });
 
         // Initial check for active participant
         fetchActiveParticipant();
@@ -99,6 +110,10 @@ export default function JudgeScoring() {
         } else {
             const error = await res.json();
             alert(error.error || 'Failed to submit score');
+            if (res.status === 401 || res.status === 403) {
+                localStorage.clear();
+                router.push('/judge');
+            }
         }
         setIsSubmitting(false);
     };

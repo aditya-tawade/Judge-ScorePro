@@ -9,7 +9,13 @@ export async function POST(request) {
         const client = await clientPromise;
         const db = client.db();
 
-        // Check if already submitted
+        // 1. Verify judge still exists
+        const judge = await db.collection('judges').findOne({ _id: new ObjectId(judgeId) });
+        if (!judge) {
+            return NextResponse.json({ error: 'Judge access revoked or deleted' }, { status: 403 });
+        }
+
+        // 2. Check if already submitted
         const existing = await db.collection('scores').findOne({
             participantId: new ObjectId(participantId),
             judgeId

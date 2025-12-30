@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
-import { Plus, Users, Trophy, Play, CheckCircle, Clock, ChevronRight, Trash2, AlertTriangle, LogOut } from 'lucide-react';
+import { Plus, Users, Trophy, Play, CheckCircle, Clock, ChevronRight, Trash2, AlertTriangle, LogOut, Gavel, Copy, Check, ExternalLink, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 
@@ -19,9 +19,15 @@ export default function AdminDashboard() {
     const [newEvent, setNewEvent] = useState({ name: '', criteria: [] });
     const [newParticipant, setNewParticipant] = useState({ name: '', number: '' });
     const [eventToDelete, setEventToDelete] = useState(null);
+    const [judges, setJudges] = useState([]);
+    const [newJudgeName, setNewJudgeName] = useState('');
+    const [newJudgePhone, setNewJudgePhone] = useState('');
+    const [isJudgeModalOpen, setIsJudgeModalOpen] = useState(false);
+    const [copySuccess, setCopySuccess] = useState(null);
 
     useEffect(() => {
         fetchEvents();
+        fetchJudges();
     }, []);
 
     useEffect(() => {
@@ -143,6 +149,49 @@ export default function AdminDashboard() {
         }
     };
 
+    const fetchJudges = async () => {
+        const res = await fetch('/api/judges');
+        const data = await res.json();
+        setJudges(data);
+    };
+
+    const addJudge = async () => {
+        if (!newJudgeName.trim()) return;
+        const res = await fetch('/api/judges', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: newJudgeName, phone: newJudgePhone }),
+        });
+        if (res.ok) {
+            setNewJudgeName('');
+            setNewJudgePhone('');
+            setIsJudgeModalOpen(false);
+            fetchJudges();
+        }
+    };
+
+    const shareOnWhatsApp = (judge) => {
+        if (!judge.phone) {
+            alert("No WhatsApp number provided for this judge.");
+            return;
+        }
+        const message = `Hello ${judge.name}, you have been authorized as a judge. Access your scoring portal here: ${window.location.origin}/judge?code=${judge.passcode}\n\nYour Passcode: ${judge.passcode}`;
+        const encoded = encodeURIComponent(message);
+        window.open(`https://wa.me/${judge.phone.replace(/\+/g, '')}?text=${encoded}`, '_blank');
+    };
+
+    const deleteJudge = async (id) => {
+        const res = await fetch(`/api/judges?id=${id}`, { method: 'DELETE' });
+        if (res.ok) fetchJudges();
+    };
+
+    const copyInviteLink = (passcode) => {
+        const url = `${window.location.origin}/judge?code=${passcode}`;
+        navigator.clipboard.writeText(url);
+        setCopySuccess(passcode);
+        setTimeout(() => setCopySuccess(null), 2000);
+    };
+
     const deleteEvent = async () => {
         if (!eventToDelete) return;
         const res = await fetch(`/api/events/${eventToDelete._id}`, {
@@ -227,6 +276,73 @@ export default function AdminDashboard() {
                                     </button>
                                 </div>
                             ))}
+                        </div>
+                    </section>
+
+                    {/* Judge Management */}
+                    <section className="glass rounded-2xl p-6 border border-slate-800">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold flex items-center gap-2">
+                                <Gavel className="text-indigo-400" /> Authorized Judges
+                            </h2>
+                            <button
+                                onClick={() => setIsJudgeModalOpen(true)}
+                                className="p-2 bg-indigo-600/20 text-indigo-400 rounded-lg hover:bg-indigo-600/30 transition-all"
+                            >
+                                <Plus size={16} />
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {judges.map(judge => (
+                                <div key={judge._id} className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 group">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <div className="font-bold text-sm text-white">{judge.name}</div>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <code className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">
+                                                    {judge.passcode}
+                                                </code>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => deleteJudge(judge._id)}
+                                            className="text-slate-600 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => copyInviteLink(judge.passcode)}
+                                            className="flex-1 flex items-center justify-center gap-2 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:border-slate-700 transition-all"
+                                        >
+                                            {copySuccess === judge.passcode ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                                            {copySuccess === judge.passcode ? 'URL Copied' : 'Invite Link'}
+                                        </button>
+                                        {judge.phone && (
+                                            <button
+                                                onClick={() => shareOnWhatsApp(judge)}
+                                                className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-500 hover:bg-emerald-500/20 transition-all"
+                                                title="Share on WhatsApp"
+                                            >
+                                                <MessageCircle size={12} />
+                                            </button>
+                                        )}
+                                        <Link
+                                            href={`/judge?code=${judge.passcode}`}
+                                            target="_blank"
+                                            className="p-1.5 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-all"
+                                        >
+                                            <ExternalLink size={12} />
+                                        </Link>
+                                    </div>
+                                </div>
+                            ))}
+                            {judges.length === 0 && (
+                                <div className="text-center py-4 border border-dashed border-slate-800 rounded-xl">
+                                    <p className="text-xs text-slate-600 font-medium">No judges added yet</p>
+                                </div>
+                            )}
                         </div>
                     </section>
 
@@ -435,6 +551,48 @@ export default function AdminDashboard() {
                                 className="flex-1 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold transition-colors shadow-lg shadow-rose-900/20"
                             >
                                 Delete Everything
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Add Judge Modal */}
+            {isJudgeModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 w-full max-w-md shadow-2xl">
+                        <h2 className="text-2xl font-bold mb-6">Authorize New Judge</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Full Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Judge Michael"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
+                                    value={newJudgeName}
+                                    onChange={e => setNewJudgeName(e.target.value)}
+                                />
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">WhatsApp Number (with Country Code)</label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. +919876543210"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    value={newJudgePhone}
+                                    onChange={e => setNewJudgePhone(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-4 mt-8">
+                            <button
+                                onClick={() => setIsJudgeModalOpen(false)}
+                                className="flex-1 px-4 py-3 rounded-xl border border-slate-800 hover:bg-slate-800 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={addJudge}
+                                className="flex-1 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold transition-colors"
+                            >
+                                Authorize
                             </button>
                         </div>
                     </div>
