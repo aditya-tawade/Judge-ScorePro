@@ -3,9 +3,11 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { pusherClient } from '@/lib/pusher';
-import { Trophy, Medal, Crown, ArrowLeft, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Trophy, Medal, Crown, ArrowLeft, ChevronDown, ChevronUp, Loader2, FileDown } from 'lucide-react';
 import Link from 'next/link';
 import { clsx } from 'clsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 function LeaderboardContent() {
     const searchParams = useSearchParams();
@@ -58,6 +60,98 @@ function LeaderboardContent() {
         setLoadingScores(false);
     };
 
+    const exportToPDF = async () => {
+        // Fetch all scores for this event
+        const scoresRes = await fetch(`/api/scores?eventId=${eventId}`);
+        const allScores = await scoresRes.json();
+
+        const doc = new jsPDF();
+
+        // --- PAGE 1: RANKINGS ---
+        doc.setFontSize(22);
+        doc.setTextColor(30, 41, 59);
+        doc.text(eventName || 'Competition Results', 14, 22);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100, 116, 139);
+        doc.text('Official Results Leaderboard', 14, 30);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 36);
+
+        const rankingsTable = leaderboard.map((player, idx) => {
+            const currentRank = idx + 1;
+            let displayRank = currentRank;
+            if (idx > 0 && player.averageScore === leaderboard[idx - 1].averageScore) {
+                let firstIdx = idx;
+                while (firstIdx > 0 && leaderboard[firstIdx - 1].averageScore === player.averageScore) {
+                    firstIdx--;
+                }
+                displayRank = firstIdx + 1;
+            }
+            return [displayRank, player.name, player.averageScore.toFixed(2)];
+        });
+
+        autoTable(doc, {
+            startY: 45,
+            head: [['Rank', 'Participant Name', 'Average Score']],
+            body: rankingsTable,
+            theme: 'striped',
+            headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255] },
+            alternateRowStyles: { fillColor: [248, 250, 252] },
+            margin: { top: 45 },
+            styles: { fontSize: 10, cellPadding: 5 }
+        });
+
+        const finalY = doc.lastAutoTable.finalY || 150;
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text('__________________________', 14, finalY + 30);
+        doc.text('Official Authority Stamp', 14, finalY + 35);
+
+        // --- PAGE 2+: DETAILED JUDGE BREAKDOWN ---
+        leaderboard.forEach((player) => {
+            doc.addPage();
+
+            doc.setFontSize(18);
+            doc.setTextColor(30, 41, 59);
+            doc.text('Detailed Score Report', 14, 22);
+
+            doc.setFontSize(14);
+            doc.setTextColor(79, 70, 229);
+            doc.text(`${player.name} (${player.participantNumber ? '#' + player.participantNumber : 'ID: ' + player._id.substring(0, 6)})`, 14, 32);
+
+            doc.setFontSize(11);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`Final Average: ${player.averageScore.toFixed(2)}`, 14, 38);
+
+            const participantScores = allScores.filter(s => s.participantId === player._id);
+
+            if (participantScores.length > 0) {
+                const judgeTableHead = ['Judge Name', 'Total', ...Object.keys(participantScores[0].scores)];
+                const judgeTableBody = participantScores.map(score => [
+                    score.judgeName || 'Unknown Judge',
+                    score.totalScore.toFixed(2),
+                    ...Object.values(score.scores).map(v => `${v}/10`)
+                ]);
+
+                autoTable(doc, {
+                    startY: 45,
+                    head: [judgeTableHead],
+                    body: judgeTableBody,
+                    theme: 'grid',
+                    headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
+                    styles: { fontSize: 9, cellPadding: 4 },
+                    margin: { top: 45 }
+                });
+            } else {
+                doc.setFontSize(10);
+                doc.setTextColor(153, 27, 27);
+                doc.text('No judge submissions recorded for this participant.', 14, 50);
+            }
+        });
+
+        doc.save(`${eventName.replace(/\s+/g, '_')}_Full_Report.pdf`);
+    };
+
     return (
         <div className="min-h-screen bg-slate-950 text-slate-50 p-4 md:p-12">
             <div className="max-w-4xl mx-auto">
@@ -71,10 +165,19 @@ function LeaderboardContent() {
                             <Trophy size={18} className="text-amber-500 shrink-0" /> Official Results Leaderboard
                         </p>
                     </div>
-                    <div className="hidden md:block">
-                        <div className="w-24 h-24 bg-indigo-600/20 rounded-3xl flex items-center justify-center border border-indigo-500/30">
-                            <Trophy size={48} className="text-indigo-400" />
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <div className="hidden md:block">
+                            <div className="w-20 h-20 bg-indigo-600/20 rounded-3xl flex items-center justify-center border border-indigo-500/30">
+                                <Trophy size={40} className="text-indigo-400" />
+                            </div>
                         </div>
+                        <button
+                            onClick={exportToPDF}
+                            className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center text-emerald-500 hover:bg-emerald-500/20 transition-all shadow-lg shadow-emerald-900/10 group"
+                            title="Download PDF Report"
+                        >
+                            <FileDown size={40} className="group-hover:scale-110 transition-transform" />
+                        </button>
                     </div>
                 </header>
 

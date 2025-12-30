@@ -58,9 +58,13 @@ export async function GET(request) {
     try {
         const client = await clientPromise;
         const db = client.db();
-        const scores = await db.collection('scores').find({
-            participantId: new ObjectId(participantId)
-        }).toArray();
+
+        const query = {};
+        if (participantId) query.participantId = new ObjectId(participantId);
+        const eventId = searchParams.get('eventId');
+        if (eventId) query.eventId = eventId;
+
+        const scores = await db.collection('scores').find(query).toArray();
         return NextResponse.json(scores);
     } catch (e) {
         return NextResponse.json({ error: e.message }, { status: 500 });
