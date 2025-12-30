@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
-import { Plus, Users, Trophy, Play, CheckCircle, Clock, ChevronRight } from 'lucide-react';
+import { Plus, Users, Trophy, Play, CheckCircle, Clock, ChevronRight, Trash2, AlertTriangle } from 'lucide-react';
 import { clsx } from 'clsx';
 
 import Link from 'next/link';
@@ -16,6 +16,7 @@ export default function AdminDashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newEvent, setNewEvent] = useState({ name: '', criteria: [] });
     const [newParticipant, setNewParticipant] = useState({ name: '', number: '' });
+    const [eventToDelete, setEventToDelete] = useState(null);
 
     useEffect(() => {
         fetchEvents();
@@ -140,6 +141,22 @@ export default function AdminDashboard() {
         }
     };
 
+    const deleteEvent = async () => {
+        if (!eventToDelete) return;
+        const res = await fetch(`/api/events/${eventToDelete._id}`, {
+            method: 'DELETE',
+        });
+        if (res.ok) {
+            if (selectedEvent?._id === eventToDelete._id) {
+                setSelectedEvent(null);
+                setParticipants([]);
+                setActiveParticipant(null);
+            }
+            fetchEvents();
+            setEventToDelete(null);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-slate-950 text-slate-50 p-4 md:p-8">
             <header className="flex justify-between items-center mb-12">
@@ -168,19 +185,34 @@ export default function AdminDashboard() {
                         </h2>
                         <div className="space-y-3">
                             {events.map(event => (
-                                <button
+                                <div
                                     key={event._id}
-                                    onClick={() => setSelectedEvent(event)}
                                     className={clsx(
-                                        "w-full text-left p-4 rounded-xl transition-all border",
-                                        selectedEvent?._id === event._id
-                                            ? "bg-indigo-600/20 border-indigo-500/50 shadow-[0_0_20px_rgba(79,70,229,0.15)]"
-                                            : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
+                                        "w-full flex items-center gap-2 group",
                                     )}
                                 >
-                                    <div className="font-medium">{event.name}</div>
-                                    <div className="text-xs text-slate-400 mt-1">{event.criteria.length} Criteria</div>
-                                </button>
+                                    <button
+                                        onClick={() => setSelectedEvent(event)}
+                                        className={clsx(
+                                            "flex-1 text-left p-4 rounded-xl transition-all border",
+                                            selectedEvent?._id === event._id
+                                                ? "bg-indigo-600/20 border-indigo-500/50 shadow-[0_0_20px_rgba(79,70,229,0.15)]"
+                                                : "bg-slate-900/50 border-slate-800 hover:border-slate-700"
+                                        )}
+                                    >
+                                        <div className="font-medium">{event.name}</div>
+                                        <div className="text-xs text-slate-400 mt-1">{event.criteria.length} Criteria</div>
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEventToDelete(event);
+                                        }}
+                                        className="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 hover:text-rose-500 hover:border-rose-500/50 transition-all opacity-0 group-hover:opacity-100"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
                             ))}
                         </div>
                     </section>
@@ -361,6 +393,35 @@ export default function AdminDashboard() {
                                 className="flex-1 px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold transition-colors"
                             >
                                 Create
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {eventToDelete && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 w-full max-w-md shadow-2xl">
+                        <div className="w-16 h-16 bg-rose-500/20 rounded-2xl flex items-center justify-center mb-6 text-rose-500">
+                            <AlertTriangle size={32} />
+                        </div>
+                        <h2 className="text-2xl font-bold mb-2 text-white">Delete Event?</h2>
+                        <p className="text-slate-400 mb-8 leading-relaxed">
+                            This will permanently delete <span className="text-white font-bold">"{eventToDelete.name}"</span> and all associated participants and judge scores. This action cannot be undone.
+                        </p>
+                        <div className="flex gap-4">
+                            <button
+                                onClick={() => setEventToDelete(null)}
+                                className="flex-1 px-4 py-3 rounded-xl border border-slate-800 text-slate-300 hover:bg-slate-800 transition-colors font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={deleteEvent}
+                                className="flex-1 px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold transition-colors shadow-lg shadow-rose-900/20"
+                            >
+                                Delete Everything
                             </button>
                         </div>
                     </div>

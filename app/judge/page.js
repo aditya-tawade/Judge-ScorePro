@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Gavel, User, ArrowRight } from 'lucide-react';
 import { nanoid } from 'nanoid';
@@ -9,12 +9,23 @@ export default function JudgeJoin() {
     const [name, setName] = useState('');
     const router = useRouter();
 
+    useEffect(() => {
+        const savedName = localStorage.getItem('judgeName');
+        if (savedName) {
+            setName(savedName);
+        }
+    }, []);
+
     const handleJoin = (e) => {
         e.preventDefault();
         if (!name.trim()) return;
 
-        const judgeId = nanoid(5);
-        localStorage.setItem('judgeId', judgeId);
+        let judgeId = localStorage.getItem('judgeId');
+        if (!judgeId) {
+            judgeId = nanoid(5);
+            localStorage.setItem('judgeId', judgeId);
+        }
+
         localStorage.setItem('judgeName', name);
         router.push('/judge/score');
     };
