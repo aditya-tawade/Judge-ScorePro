@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
-import { Gavel, Star, Send, CheckCircle2, Loader2, User } from 'lucide-react';
+import { Gavel, Star, Send, CheckCircle2, Loader2, User, AlertTriangle, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useRouter } from 'next/navigation';
 
@@ -14,7 +14,13 @@ export default function JudgeScoring() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [judgeId, setJudgeId] = useState('');
     const [judgeName, setJudgeName] = useState('');
+    const [notification, setNotification] = useState(null);
     const router = useRouter();
+
+    const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 3000);
+    };
 
     useEffect(() => {
         const jId = localStorage.getItem('judgeId');
@@ -84,7 +90,7 @@ export default function JudgeScoring() {
     const submitScore = async () => {
         const isAllScored = event.criteria.every(c => scores[c.name] !== undefined);
         if (!isAllScored) {
-            alert("Please provide a score for all criteria.");
+            showNotification("Please provide a score for all criteria.", "error");
             return;
         }
 
@@ -109,10 +115,12 @@ export default function JudgeScoring() {
             setIsSubmitted(true);
         } else {
             const error = await res.json();
-            alert(error.error || 'Failed to submit score');
+            showNotification(error.error || 'Failed to submit score', "error");
             if (res.status === 401 || res.status === 403) {
-                localStorage.clear();
-                router.push('/judge');
+                setTimeout(() => {
+                    localStorage.clear();
+                    router.push('/judge');
+                }, 2000);
             }
         }
         setIsSubmitting(false);
@@ -205,6 +213,24 @@ export default function JudgeScoring() {
                     )}
                 </button>
             </footer>
+
+            {/* Notification Toast */}
+            {notification && (
+                <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 duration-300 w-[90%] max-w-md">
+                    <div className={clsx(
+                        "flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl border",
+                        notification.type === 'error'
+                            ? "bg-rose-500/20 border-rose-500/30 text-rose-400"
+                            : "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+                    )}>
+                        {notification.type === 'error' ? <AlertTriangle size={20} /> : <CheckCircle2 size={20} />}
+                        <span className="font-bold text-sm tracking-wide flex-1">{notification.message}</span>
+                        <button onClick={() => setNotification(null)} className="ml-2 p-1 hover:bg-white/10 rounded-lg transition-colors">
+                            <X size={16} />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

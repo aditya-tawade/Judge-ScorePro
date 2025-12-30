@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { pusherClient } from '@/lib/pusher';
-import { Plus, Users, Trophy, Play, CheckCircle, Clock, ChevronRight, Trash2, AlertTriangle, LogOut, Gavel, Copy, Check, ExternalLink, MessageCircle } from 'lucide-react';
+import { Plus, Users, Trophy, Play, CheckCircle, Clock, ChevronRight, Trash2, AlertTriangle, LogOut, Gavel, Copy, Check, ExternalLink, MessageCircle, Info, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 
@@ -24,6 +24,12 @@ export default function AdminDashboard() {
     const [newJudgePhone, setNewJudgePhone] = useState('');
     const [isJudgeModalOpen, setIsJudgeModalOpen] = useState(false);
     const [copySuccess, setCopySuccess] = useState(null);
+    const [notification, setNotification] = useState(null);
+
+    const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 3000);
+    };
 
     useEffect(() => {
         fetchEvents();
@@ -106,6 +112,10 @@ export default function AdminDashboard() {
     };
 
     const addParticipant = async () => {
+        if (!newParticipant.name.trim()) {
+            showNotification("Please enter a participant name", "error");
+            return;
+        }
         const res = await fetch('/api/participants', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -118,6 +128,15 @@ export default function AdminDashboard() {
         if (res.ok) {
             fetchParticipants(selectedEvent._id);
             setNewParticipant({ name: '', number: '' });
+            showNotification("Participant added successfully");
+        }
+    };
+
+    const deleteParticipant = async (id) => {
+        const res = await fetch(`/api/participants?id=${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            fetchParticipants(selectedEvent._id);
+            showNotification("Participant deleted");
         }
     };
 
@@ -172,7 +191,7 @@ export default function AdminDashboard() {
 
     const shareOnWhatsApp = (judge) => {
         if (!judge.phone) {
-            alert("No WhatsApp number provided for this judge.");
+            showNotification("No WhatsApp number provided for this judge.", "error");
             return;
         }
         const message = `Hello ${judge.name}, you have been authorized as a judge. Access your scoring portal here: ${window.location.origin}/judge?code=${judge.passcode}\n\nYour Passcode: ${judge.passcode}`;
@@ -373,16 +392,27 @@ export default function AdminDashboard() {
                                             <div className="text-sm font-medium">{p.name}</div>
                                             <div className="text-[10px] text-slate-500 uppercase tracking-wider">{p.status}</div>
                                         </div>
-                                        {p.status === 'pending' && (
-                                            <button
-                                                onClick={() => startScoring(p)}
-                                                className="p-1.5 rounded-full hover:bg-slate-800 text-indigo-400"
-                                                title="Start Scoring"
-                                            >
-                                                <Play size={16} />
-                                            </button>
-                                        )}
-                                        {p.status === 'completed' && <CheckCircle size={16} className="text-emerald-500" />}
+                                        <div className="flex items-center gap-1">
+                                            {p.status === 'pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => deleteParticipant(p._id)}
+                                                        className="p-1.5 rounded-full hover:bg-rose-500/10 text-slate-600 hover:text-rose-500 transition-colors"
+                                                        title="Delete Participant"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => startScoring(p)}
+                                                        className="p-1.5 rounded-full hover:bg-indigo-500/10 text-indigo-400"
+                                                        title="Start Scoring"
+                                                    >
+                                                        <Play size={16} />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {p.status === 'completed' && <CheckCircle size={16} className="text-emerald-500" />}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -595,6 +625,24 @@ export default function AdminDashboard() {
                                 Authorize
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Notification Toast */}
+            {notification && (
+                <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className={clsx(
+                        "flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl backdrop-blur-xl border",
+                        notification.type === 'error'
+                            ? "bg-rose-500/10 border-rose-500/30 text-rose-500"
+                            : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                    )}>
+                        {notification.type === 'error' ? <AlertTriangle size={20} /> : <CheckCircle size={20} />}
+                        <span className="font-bold text-sm tracking-wide">{notification.message}</span>
+                        <button onClick={() => setNotification(null)} className="ml-4 hover:opacity-70 transition-opacity">
+                            <X size={16} />
+                        </button>
                     </div>
                 </div>
             )}
