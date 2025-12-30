@@ -221,7 +221,7 @@ export default function AdminDashboard() {
                                             e.stopPropagation();
                                             setEventToDelete(event);
                                         }}
-                                        className="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 hover:text-rose-500 hover:border-rose-500/50 transition-all opacity-0 group-hover:opacity-100"
+                                        className="p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-500 hover:text-rose-500 hover:border-rose-500/50 transition-all opacity-60 group-hover:opacity-100"
                                     >
                                         <Trash2 size={18} />
                                     </button>
