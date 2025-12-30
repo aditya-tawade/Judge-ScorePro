@@ -59,16 +59,16 @@ function LeaderboardContent() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-50 p-6 md:p-12">
+        <div className="min-h-screen bg-slate-950 text-slate-50 p-4 md:p-12">
             <div className="max-w-4xl mx-auto">
                 <header className="mb-12 flex items-center justify-between">
                     <div>
-                        <Link href="/admin" className="text-slate-500 hover:text-slate-300 flex items-center gap-2 mb-4 transition-colors">
-                            <ArrowLeft size={16} /> Back to Controls
+                        <Link href="/admin" className="text-slate-500 hover:text-slate-300 flex items-center gap-2 mb-4 transition-colors text-sm">
+                            <ArrowLeft size={14} /> Back to Controls
                         </Link>
-                        <h1 className="text-5xl font-black">{eventName}</h1>
-                        <p className="text-slate-500 mt-2 flex items-center gap-2">
-                            <Trophy size={18} className="text-amber-500" /> Official Results Leaderboard
+                        <h1 className="text-3xl md:text-5xl font-black">{eventName}</h1>
+                        <p className="text-slate-500 mt-2 flex items-center gap-2 text-sm md:text-base">
+                            <Trophy size={18} className="text-amber-500 shrink-0" /> Official Results Leaderboard
                         </p>
                     </div>
                     <div className="hidden md:block">
@@ -101,42 +101,45 @@ function LeaderboardContent() {
                                         displayRank === 1 ? "premium-gradient" : "bg-slate-800/50"
                                     )}
                                 >
-                                    <div className="bg-slate-950 rounded-[1.8rem] p-6">
-                                        <div className="flex items-center gap-6">
-                                            <div className={clsx(
-                                                "w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black shrink-0",
-                                                displayRank === 1 ? "bg-amber-500 text-slate-950" :
-                                                    displayRank === 2 ? "bg-slate-300 text-slate-950" :
-                                                        displayRank === 3 ? "bg-orange-600 text-slate-950" :
-                                                            "bg-slate-800 text-slate-500"
-                                            )}>
-                                                {displayRank === 1 ? <Crown size={24} /> : displayRank}
-                                            </div>
+                                    <div className="bg-slate-950 rounded-[1.8rem] p-4 md:p-6">
+                                        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+                                            <div className="flex items-center gap-4 flex-1">
+                                                <div className={clsx(
+                                                    "w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-lg md:text-xl font-black shrink-0",
+                                                    displayRank === 1 ? "bg-amber-500 text-slate-950" :
+                                                        displayRank === 2 ? "bg-slate-300 text-slate-950" :
+                                                            displayRank === 3 ? "bg-orange-600 text-slate-950" :
+                                                                "bg-slate-800 text-slate-500"
+                                                )}>
+                                                    {displayRank === 1 ? <Crown size={20} className="md:w-6 md:h-6" /> : displayRank}
+                                                </div>
 
-                                            <div className="flex-1">
-                                                <h3 className="text-2xl font-bold">{player.name}</h3>
-                                                <div className="text-xs text-slate-500 uppercase tracking-widest font-black mt-1">
-                                                    {player.participantNumber ? `#${player.participantNumber}` : 'Participant'}
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-xl md:text-2xl font-bold truncate">{player.name}</h3>
+                                                    <div className="text-[10px] text-slate-500 uppercase tracking-widest font-black mt-0.5">
+                                                        {player.participantNumber ? `#${player.participantNumber}` : 'Participant'}
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center gap-6">
+                                            <div className="flex items-center justify-between md:justify-end gap-4 md:gap-8 pt-4 md:pt-0 border-t border-slate-900 md:border-t-0">
                                                 <button
                                                     onClick={() => toggleDetails(player._id)}
                                                     className={clsx(
-                                                        "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border",
+                                                        "flex items-center gap-2 px-3 py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all border",
                                                         isExpanded ? "bg-indigo-600 border-indigo-500 text-white" : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
                                                     )}
                                                 >
-                                                    {isExpanded ? 'Hide Scores' : 'Check Judge Scores'}
+                                                    <span className="hidden xs:inline">{isExpanded ? 'Hide Scores' : 'Check Judge Scores'}</span>
+                                                    <span className="xs:hidden">{isExpanded ? 'Scores' : 'Check'}</span>
                                                     {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                                 </button>
 
                                                 <div className="text-right">
-                                                    <div className="text-4xl font-black text-white tabular-nums">
+                                                    <div className="text-3xl md:text-4xl font-black text-white tabular-nums">
                                                         {player.averageScore.toFixed(2)}
                                                     </div>
-                                                    <div className="text-[10px] text-slate-600 font-black uppercase tracking-widest">Avg Score</div>
+                                                    <div className="text-[9px] md:text-[10px] text-slate-600 font-black uppercase tracking-widest">Avg Score</div>
                                                 </div>
                                             </div>
                                         </div>
