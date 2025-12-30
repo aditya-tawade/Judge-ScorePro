@@ -1,64 +1,71 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Gavel, ShieldCheck, Trophy, Users } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
+    <div className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500/30">
+      {/* Background Decor */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full" />
+      </div>
+
+      <main className="relative z-10 container mx-auto px-6 py-20 flex flex-col items-center justify-center min-h-screen">
+        <div className="text-center mb-16 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-indigo-400 text-sm font-bold mb-6">
+            <Trophy size={16} /> Competition Management System
+          </div>
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-500">
+            Judge Score<span className="text-indigo-500">Pro</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-lg md:text-xl text-slate-400 font-medium leading-relaxed">
+            The ultimate real-time scoring platform for dance, singing, and talent competitions.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+          <Link
+            href="/admin"
+            className="group relative overflow-hidden glass rounded-[2.5rem] p-10 transition-all hover:translate-y-[-8px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] active:scale-95"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <ShieldCheck size={120} />
+            </div>
+            <div className="flex flex-col h-full">
+              <div className="w-16 h-16 bg-white text-slate-950 rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover:rotate-6 transition-transform">
+                <ShieldCheck size={32} />
+              </div>
+              <h2 className="text-3xl font-bold mb-3">Admin Panel</h2>
+              <p className="text-slate-400 font-medium">Create events, manage participants, and control the live competition flow.</p>
+              <div className="mt-auto pt-8 flex items-center gap-2 text-indigo-400 font-bold">
+                Access Dashboard <Gavel size={18} />
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            href="/judge"
+            className="group relative overflow-hidden glass rounded-[2.5rem] p-10 transition-all hover:translate-y-[-8px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] active:scale-95"
           >
-            Documentation
-          </a>
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Users size={120} />
+            </div>
+            <div className="flex flex-col h-full">
+              <div className="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-indigo-600/20 group-hover:-rotate-6 transition-transform">
+                <Gavel size={32} />
+              </div>
+              <h2 className="text-3xl font-bold mb-3">Judge Entry</h2>
+              <p className="text-slate-400 font-medium">Join a live session, evaluate performers, and submit real-time scores from your phone.</p>
+              <div className="mt-auto pt-8 flex items-center gap-2 text-indigo-400 font-bold">
+                Join as Judge <Users size={18} />
+              </div>
+            </div>
+          </Link>
         </div>
+
+        <footer className="mt-20 text-slate-600 text-xs font-black uppercase tracking-[0.4em]">
+          Powered by Next.js & MongoDB
+        </footer>
       </main>
     </div>
   );
