@@ -52,8 +52,8 @@ Judge Score Pro is a premium, mobile-first web application designed for professi
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/judge-score-pro.git
-cd judge-score-pro
+git clone https://github.com/aditya-tawade/Open-Judge-Score.git
+cd Open-Judge-Score
 ```
 
 ### 2. Install Dependencies
