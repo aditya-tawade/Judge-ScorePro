@@ -2,6 +2,8 @@
 
 **Real-time Competition Scoring & Leaderboard Management System**
 
+![App Landing Page](public/screenshots/landing_page.png)
+
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green)
