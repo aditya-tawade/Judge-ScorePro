@@ -45,6 +45,12 @@ Judge Score Pro is a premium, mobile-first web application designed for professi
 
 ---
 
+> [!NOTE]
+> **Designed and Developed by Aditya Tawade**  
+> Powered by Modern Web Technologies (Next.js & MongoDB)
+
+---
+
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
